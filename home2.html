@@ -1,0 +1,151 @@
+<?php include ("upload.php";?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Biological Data</title>
+    <link href="css/styles.css" rel="stylesheet"/>
+    <link href="css/sidebar.css" rel="stylesheet"/>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script type="text/javascript" src="js/main.js"></script>
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+
+</head>
+
+
+
+<div class="sidebar">
+    <h2>Sidebar</h2>
+    <ul>
+        <li><a href="#"><i class="fas fa-home"></i>Home</a></li>
+        <li><a href="/extractText"><i class="fas fa-font"></i></i>Text Extract</a></li>
+        <li><a href="/extractInfo"><i class="fas fa-info"></i></i>Information Extract</a></li>
+        <li><a href="/gallery"><i class="fas fa-image"></i>Gallery</a></li>
+        <li><a href="#"><i class="fas fa-address-card"></i>About</a></li>
+        <li><a href="#"><i class="fas fa-address-book"></i>Contact</a></li>
+    </ul>
+    <div class="social_media">
+        <a href="https://www.facebook.com/BristolMuseumandArtGallery/"><i class="fab fa-facebook-f"></i></a>
+        <a href="https://twitter.com/bristolmuseum"><i class="fab fa-twitter"></i></a>
+        <a href="https://www.instagram.com/bristolmuseums/"><i class="fab fa-instagram"></i></a>
+    </div>
+</div>
+
+<div class="center">
+
+    <form action="/gallery" method="post" enctype="multipart/form-data">
+        <input type="file" name="imageFile">
+        <input type="submit" value="Upload Image">
+    </form>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<div id="drop_area" class="dropbox">
+    <article id = "drag" class="drag">
+        Please Drag Image HERE.
+    </article>
+</div>
+
+
+
+<div id="preview_area" class="preview_box">
+    <ul id="ul1">Preview Area</ul>
+</div>
+
+<div id="pb" class="progress_bar">progress:0%</div>
+<button class="button button1">Preview</button>
+<button class="button button2" id="btn2">Clear</button>
+<button class="button button3" id="btn3">Submit</button>
+
+
+<script>
+
+    var obox = document.getElementById("drag");
+    var oul = document.getElementById("ul1");
+    var obtn = document.getElementById("btn3");
+    var oclear = document.getElementById("btn2");
+    var oprogress = document.getElementById("pb");
+    var arr = [];
+
+
+
+    obox.addEventListener('dragenter', drag, false);
+    obox.addEventListener('dragover', drag, false);
+    obox.addEventListener('dragleave', drag, false);
+    obox.addEventListener('drop', drag, false);
+
+    function drag(e) {
+        e.preventDefault();
+        switch(e.type){
+            case'dragenter':
+                this.innerHTML = 'PLease release the image here.';
+                break;
+            case'dragover':
+                this.innerHTML = 'Please Release the Image.';
+                break;
+            case'dragleave':
+                this.innerHTML = 'Please Drag Image HERE.';
+                break;
+            case'drop':
+                oprogress.style.width = 0 + 'px';
+                oprogress.innerHTML = 'progress:0%';
+
+                var aFiles = e.dataTransfer.files;
+                [].forEach.call(aFiles, function(current){
+                    arr.push(current);
+                    var fileRead = new FileReader();
+                    fileRead.readAsDataURL(current);
+                    fileRead.addEventListener('load', function() {
+                        var ali = document.createElement('li');
+                        ali.innerHTML = '<img src="'+this.result+'" width="50%" height="50%">';
+                        oul.appendChild(ali);
+                    })
+                });
+                this.innerHTML = 'Please Drag Image HERE.';
+                break
+        }
+    }
+
+    oclear.addEventListener('click', function() {
+        arr = [];
+        oul.innerHTML = 'Preview Area';
+        oprogress.style.width = 0 + 'px';
+        oprogress.innerHTML = 'progress:0%';
+        });
+
+    obtn.addEventListener('click', function() {
+        arr.forEach(function(current) {
+            var xhr = new XMLHttpRequest();
+            xhr.upload.onprogress = function(e){
+               var percentage = (e.loaded / e.total);
+               oprogress.style.width = 980 * percentage + 'px';
+               var con = percentage * 100;
+               oprogress.innerHTML = 'progress: ' + con.toFixed(2) + '%';
+            };
+            xhr.open('post', 'upload.php', true);
+            var oFormData = new FormData();
+            oFormData.append('file', current);
+            console.log(oFormData);
+            xhr.send(oFormData);
+            storeImage()
+        })
+    })
+
+</script>
+
+
+
+
+
+</html>
